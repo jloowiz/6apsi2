@@ -21,84 +21,85 @@ h1 {
   margin: 0 auto;
 }
 
-.start-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 80vh;
-  animation: fadeIn 1s ease-in;
+/* ==== PIXEL BUTTON BASE ==== */
+.pixel-button {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
+  padding: 20px 40px;
+  border: 4px solid #000;
+  background-color: #e0e0e0;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.05s, box-shadow 0.05s;
+  outline: none;
+  margin: 10px;
 }
 
-/* ==== PLAY BUTTON ==== */
+.pixel-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+/* Optional hover visual (no glow) */
+.pixel-button:hover {
+  background-color: #d0d0d0;
+}
+
+/* ==== COLOR VARIANTS ==== */
 .play-button {
-  margin-top: 30px;
-  padding: 30px 60px;
-  font-size: 20px;
-  font-family: 'Press Start 2P', cursive;
-  background-color: red;
+  background-color: #e47a01;
   color: #fff;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  animation: glowPulse 2s infinite alternate;
-  box-shadow: 0 0 15px red;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .play-button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 30px 10px red;
+  background-color: #b15018;
 }
 
-/* ==== PLAYER SELECTION ==== */
+.chicken-btn {
+  background-color: #ff8c42;
+  color: #fff;
+}
+
+.chicken-btn:hover {
+  background-color: #e87c35;
+}
+
+.banana-btn {
+  background-color: #f0db4f;
+  color: #000;
+}
+
+.banana-btn:hover {
+  background-color: #e2cb40;
+}
+
+.restart-button {
+  background-color: #f0db4f;
+  color: #000;
+}
+
+.restart-button:hover {
+  background-color: #e2cb40;
+}
+
+/* ==== SCREENS ==== */
+.start-screen,
 .choice-buttons {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 80vh;
-  gap: 40px;
+  height: 40vh;
   animation: fadeIn 1s ease-in;
+  padding: 40px;
+  margin: auto;
+  max-width: 300px;
+  background-image: url('https://pics.craiyon.com/2023-07-22/c406fb9e4b754ed08d8a0bad6b6d2281.webp');
+  border: 16px solid transparent;
+  border-image: url('https://pics.craiyon.com/2023-12-21/mFEpvzGOTWCFadtLCYsrtA.webp') 30 repeat;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
 }
-
-.choice-buttons button {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 18px;
-  padding: 24px 48px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-}
-
-/* Banana button style */
-.banana-btn {
-  background-color: #f0db4f;
-  color: #000;
-  animation: glowPulseYellow 2s infinite alternate;
-  box-shadow: 0 0 20px #f0db4f;
-}
-
-.banana-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 30px 12px #f0db4f;
-}
-
-/* Chicken button style */
-.chicken-btn {
-  background-color: #ff8c42;
-  color: #fff;
-  animation: glowPulseOrange 2s infinite alternate;
-  box-shadow: 0 0 20px #ff8c42;
-}
-
-.chicken-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 30px 12px #ff8c42;
-}
-
 
 /* ==== TILE GRID ==== */
 .grid {
@@ -176,27 +177,6 @@ h1 {
   color: #00ffcc;
 }
 
-/* ==== RESTART BUTTON ==== */
-.restart-button {
-  margin-top: 20px;
-  font-family: 'Press Start 2P', cursive;
-  padding: 12px 24px;
-  font-size: 12px;
-  background-color: #f0db4f;
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  animation: glowPulseYellow 2s infinite alternate;
-  box-shadow: 0 0 10px #f0db4f;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.restart-button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 20px 10px #f0db4f;
-}
-
 /* ==== ANIMATIONS ==== */
 @keyframes flipIn {
   from {
@@ -238,32 +218,5 @@ h1 {
   }
   100% {
     transform: translateY(0);
-  }
-}
-
-@keyframes glowPulse {
-  from {
-    box-shadow: 0 0 12px red;
-  }
-  to {
-    box-shadow: 0 0 24px 8px red;
-  }
-}
-
-@keyframes glowPulseYellow {
-  from {
-    box-shadow: 0 0 10px #f0db4f;
-  }
-  to {
-    box-shadow: 0 0 20px 6px #f0db4f;
-  }
-}
-
-@keyframes glowPulseOrange {
-  from {
-    box-shadow: 0 0 10px #ff8c42;
-  }
-  to {
-    box-shadow: 0 0 20px 6px #ff8c42;
   }
 }
