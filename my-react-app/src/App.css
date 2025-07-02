@@ -21,6 +21,86 @@ h1 {
   margin: 0 auto;
 }
 
+.start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  animation: fadeIn 1s ease-in;
+}
+
+/* ==== PLAY BUTTON ==== */
+.play-button {
+  margin-top: 30px;
+  padding: 30px 60px;
+  font-size: 20px;
+  font-family: 'Press Start 2P', cursive;
+  background-color: red;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  animation: glowPulse 2s infinite alternate;
+  box-shadow: 0 0 15px red;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.play-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px 10px red;
+}
+
+/* ==== PLAYER SELECTION ==== */
+.choice-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  gap: 40px;
+  animation: fadeIn 1s ease-in;
+}
+
+.choice-buttons button {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 18px;
+  padding: 24px 48px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Banana button style */
+.banana-btn {
+  background-color: #f0db4f;
+  color: #000;
+  animation: glowPulseYellow 2s infinite alternate;
+  box-shadow: 0 0 20px #f0db4f;
+}
+
+.banana-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px 12px #f0db4f;
+}
+
+/* Chicken button style */
+.chicken-btn {
+  background-color: #ff8c42;
+  color: #fff;
+  animation: glowPulseOrange 2s infinite alternate;
+  box-shadow: 0 0 20px #ff8c42;
+}
+
+.chicken-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px 12px #ff8c42;
+}
+
+
+/* ==== TILE GRID ==== */
 .grid {
   display: grid;
   grid-template-columns: repeat(6, 100px);
@@ -39,10 +119,16 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Shadow for depth */
-  transition: transform 0.1s ease, box-shadow 0.2s ease;
-  animation: float 4s ease-in-out infinite; /* Floating effect */
-  animation-delay: calc(0.1s * var(--index)); /* Randomized delay per tile */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s;
+  animation: float 4s ease-in-out infinite;
+  animation-delay: calc(0.1s * var(--index));
+}
+
+.tile:hover {
+  filter: brightness(1.3);
+  box-shadow: 0 0 15px 5px #f0db4f;
+  transform: scale(1.05);
 }
 
 .tile:active {
@@ -70,40 +156,7 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.choice-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 30px;
-  flex-wrap: wrap;
-}
-
-.choice-buttons button {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 14px;
-  padding: 14px 28px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.choice-buttons button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-}
-
-.banana-btn {
-  background-color: #f0db4f;
-  color: #000;
-}
-
-.chicken-btn {
-  background-color: #ff8c42;
-  color: #fff;
-}
-
+/* ==== MESSAGE BOX ==== */
 .message {
   background-color: #ff4d4f;
   color: #fff;
@@ -116,12 +169,14 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* ==== SCORE ==== */
 .score-display {
   font-size: 12px;
   margin: 10px 0;
   color: #00ffcc;
 }
 
+/* ==== RESTART BUTTON ==== */
 .restart-button {
   margin-top: 20px;
   font-family: 'Press Start 2P', cursive;
@@ -132,17 +187,17 @@ h1 {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  animation: glowPulseYellow 2s infinite alternate;
+  box-shadow: 0 0 10px #f0db4f;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .restart-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 20px 10px #f0db4f;
 }
 
-/* Animations */
-
+/* ==== ANIMATIONS ==== */
 @keyframes flipIn {
   from {
     transform: rotateY(90deg);
@@ -183,5 +238,32 @@ h1 {
   }
   100% {
     transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  from {
+    box-shadow: 0 0 12px red;
+  }
+  to {
+    box-shadow: 0 0 24px 8px red;
+  }
+}
+
+@keyframes glowPulseYellow {
+  from {
+    box-shadow: 0 0 10px #f0db4f;
+  }
+  to {
+    box-shadow: 0 0 20px 6px #f0db4f;
+  }
+}
+
+@keyframes glowPulseOrange {
+  from {
+    box-shadow: 0 0 10px #ff8c42;
+  }
+  to {
+    box-shadow: 0 0 20px 6px #ff8c42;
   }
 }

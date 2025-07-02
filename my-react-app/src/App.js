@@ -1,78 +1,104 @@
-import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
+import React, { useState } from 'react';
 import './App.css';
-
-const socket = io('http://localhost:5000');
 
 const chickenImg = 'https://thumbs.dreamstime.com/z/full-body-brown-chicken-hen-standing-isolated-white-backgroun-background-use-farm-animals-livestock-theme-49741285.jpg';
 const bananaImg = 'https://thumbs.dreamstime.com/b/bunch-bananas-6175887.jpg';
 
 function App() {
-  const [player, setPlayer] = useState(null);
+  const [phase, setPhase] = useState('start'); // 'start', 'select', 'playing'
   const [character, setCharacter] = useState(null);
-  const [gameStarted, setGameStarted] = useState(false);
   const [board, setBoard] = useState(Array(6).fill().map(() => Array(6).fill(null)));
+  const [currentPlayer, setCurrentPlayer] = useState('player1');
   const [winner, setWinner] = useState(null);
-  const [currentPlayer, setCurrentPlayer] = useState(null);
 
-  useEffect(() => {
-    socket.on('assignPlayer', ({ player }) => setPlayer(player));
-    socket.on('gameStart', ({ player1Choice, player2Choice }) => {
-      setGameStarted(true);
-      setCurrentPlayer('player1');
-    });
-    socket.on('updateBoard', setBoard);
-    socket.on('gameOver', ({ winner }) => setWinner(winner));
-    socket.on('resetBoard', () => {
-      setBoard(Array(6).fill().map(() => Array(6).fill(null)));
-      setWinner(null);
-      setGameStarted(false);
-      setCharacter(null);
-    });
+  const handleStart = () => {
+    setPhase('select');
+  };
 
-    return () => socket.off();
-  }, []);
-
-  const chooseCharacter = (choice) => {
-    setCharacter(choice);
-    socket.emit('chooseCharacter', choice);
+  const handleCharacterSelect = (char) => {
+    setCharacter(char);
+    setPhase('playing');
   };
 
   const handleClick = (row, col) => {
-    if (!gameStarted || board[row][col] || winner || player !== currentPlayer) return;
-    socket.emit('playerMove', { player, row, col });
+    if (board[row][col] || winner || phase !== 'playing') return;
+
+    const newBoard = board.map((r, rIdx) =>
+      r.map((cell, cIdx) => {
+        if (rIdx === row && cIdx === col) {
+          return currentPlayer;
+        }
+        return cell;
+      })
+    );
+
+    setBoard(newBoard);
+
+    const flat = newBoard.flat();
+    const count1 = flat.filter(cell => cell === 'player1').length;
+    const count2 = flat.filter(cell => cell === 'player2').length;
+
+    if (count1 >= 10) setWinner('player1');
+    else if (count2 >= 10) setWinner('player2');
+    else setCurrentPlayer(currentPlayer === 'player1' ? 'player2' : 'player1');
+  };
+
+  const restartGame = () => {
+    setBoard(Array(6).fill().map(() => Array(6).fill(null)));
+    setWinner(null);
+    setPhase('start');
+    setCharacter(null);
+    setCurrentPlayer('player1');
   };
 
   const renderCell = (row, col) => {
     const value = board[row][col];
     let img = null;
-    if (value === 'player1') img = chickenImg;
-    if (value === 'player2') img = bananaImg;
+    if (value === 'player1') img = character === 'chicken' ? chickenImg : bananaImg;
+    if (value === 'player2') img = character === 'chicken' ? bananaImg : chickenImg;
     return (
       <div className="tile" key={`${row}-${col}`} onClick={() => handleClick(row, col)}>
-        {img && <img src={img} alt="icon" className="icon" />}
+        {img && <img src={img} alt="icon" />}
       </div>
     );
   };
 
   return (
     <div className="game-container">
-      {!gameStarted && !character ? (
-        <div className="character-select">
-          <h2>Select your character</h2>
-          <button onClick={() => chooseCharacter('chicken')}>Chicken</button>
-          <button onClick={() => chooseCharacter('banana')}>Banana</button>
+      {phase === 'start' && (
+        <div className="start-screen">
+          <h1>CHICKEN BANANA MINESWEEPER</h1>
+          <button className="play-button" onClick={handleStart}>Play Game</button>
         </div>
-      ) : (
+      )}
+
+      {phase === 'select' && (
+        <div className="character-select">
+          <h2>Select Your Character</h2>
+          <div className="choice-buttons">
+            <button className="chicken-btn" onClick={() => handleCharacterSelect('chicken')}>Chicken</button>
+            <button className="banana-btn" onClick={() => handleCharacterSelect('banana')}>Banana</button>
+          </div>
+        </div>
+      )}
+
+      {phase === 'playing' && (
         <>
-          <h1>{winner ? `${winner === 'player1' ? 'Chicken' : 'Banana'} Wins!` : `Current Turn: ${currentPlayer === 'player1' ? 'Chicken' : 'Banana'}`}</h1>
+          <h1>
+            {winner
+              ? `${winner === 'player1' ? character : character === 'chicken' ? 'Banana' : 'Chicken'} Wins!`
+              : `Turn: ${currentPlayer === 'player1' ? character : character === 'chicken' ? 'Banana' : 'Chicken'}`}
+          </h1>
           <div className="grid">
-            {board.map((row, rowIndex) => (
-              <div className="row" key={rowIndex}>
-                {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
+            {board.map((row, rIdx) => (
+              <div key={rIdx} className="row">
+                {row.map((_, cIdx) => renderCell(rIdx, cIdx))}
               </div>
             ))}
           </div>
+          {winner && (
+            <button className="restart-button" onClick={restartGame}>Restart</button>
+          )}
         </>
       )}
     </div>
