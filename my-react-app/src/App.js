@@ -4,57 +4,125 @@ import './App.css';
 const chickenImg = 'https://thumbs.dreamstime.com/z/full-body-brown-chicken-hen-standing-isolated-white-backgroun-background-use-farm-animals-livestock-theme-49741285.jpg';
 const bananaImg = 'https://thumbs.dreamstime.com/b/bunch-bananas-6175887.jpg';
 
+// Helper to generate a randomized board of "chicken" and "banana"
+function generateRandomBoard() {
+  const flat = Array(36)
+    .fill(null)
+    .map(() => (Math.random() < 0.5 ? 'chicken' : 'banana'));
+  const board = [];
+  for (let i = 0; i < 6; i++) {
+    board.push(flat.slice(i * 6, i * 6 + 6));
+  }
+  return board;
+}
+
 function App() {
   const [phase, setPhase] = useState('start');
-  const [character, setCharacter] = useState(null);
   const [board, setBoard] = useState(Array(6).fill().map(() => Array(6).fill(null)));
-  const [currentPlayer, setCurrentPlayer] = useState('player1');
-  const [winner, setWinner] = useState(null);
-  const [score, setScore] = useState({ player1: 0, player2: 0 });
+  const [randomized, setRandomized] = useState(null); // stores the randomized chicken/banana board
+  const [selectedTile, setSelectedTile] = useState(null);
+  const [confirmation, setConfirmation] = useState(false);
+  const [revealed, setRevealed] = useState(false); // new state for reveal/conceal
 
-  const handleStart = () => setPhase('select');
-
-  const handleCharacterSelect = (char) => {
-    setCharacter(char);
+  const handleStart = () => {
+    const rand = generateRandomBoard();
+    setRandomized(rand);
+    setBoard(Array(6).fill().map(() => Array(6).fill(null)));
     setPhase('playing');
+    setSelectedTile(null);
+    setConfirmation(false);
+    setRevealed(false);
   };
 
   const handleClick = (row, col) => {
-    if (board[row][col] || winner || phase !== 'playing') return;
-
-    const newBoard = board.map((r, rIdx) =>
-      r.map((cell, cIdx) => (rIdx === row && cIdx === col ? currentPlayer : cell))
-    );
-
-    const flat = newBoard.flat();
-    const count1 = flat.filter(cell => cell === 'player1').length;
-    const count2 = flat.filter(cell => cell === 'player2').length;
-
-    setScore({ player1: count1, player2: count2 });
-    setBoard(newBoard);
-
-    if (count1 >= 10) setWinner('player1');
-    else if (count2 >= 10) setWinner('player2');
-    else setCurrentPlayer(currentPlayer === 'player1' ? 'player2' : 'player1');
+    if (phase !== 'playing' || confirmation || revealed) return;
+    setSelectedTile({ row, col });
+    setConfirmation(true);
   };
 
-  const restartGame = () => {
+  // Reveal all tiles, chosen tile glows
+  const handleConfirm = () => {
+    if (!selectedTile) return;
+    const { row, col } = selectedTile;
+    const newBoard = board.map((r, rIdx) =>
+      r.map((cell, cIdx) => (rIdx === row && cIdx === col ? 'chosen' : 'opened'))
+    );
+    setBoard(newBoard);
+    setConfirmation(false);
+    setPhase('ended');
+    setRevealed(false);
+  };
+
+  // Reveal all tiles (no glowing)
+  const handleReveal = () => {
+    if (!revealed) {
+      const newBoard = board.map((r, rIdx) =>
+        r.map((cell, cIdx) => (cell === 'chosen' ? 'chosen' : 'opened'))
+      );
+      setBoard(newBoard);
+      setRevealed(true);
+    } else {
+      // Conceal all tiles (except chosen if ended)
+      const newBoard = board.map((r, rIdx) =>
+        r.map((cell, cIdx) =>
+          (phase === 'ended' && cell === 'chosen') ? 'chosen' : null
+        )
+      );
+      setBoard(newBoard);
+      setRevealed(false);
+    }
+  };
+
+  // Randomize the chicken/banana board, reset all tiles
+  const handleRandomize = () => {
+    const rand = generateRandomBoard();
+    setRandomized(rand);
     setBoard(Array(6).fill().map(() => Array(6).fill(null)));
-    setWinner(null);
+    setSelectedTile(null);
+    setConfirmation(false);
+    setPhase('playing');
+    setRevealed(false);
+  };
+
+  // Exit to start screen
+  const handleExit = () => {
+    setBoard(Array(6).fill().map(() => Array(6).fill(null)));
+    setRandomized(null);
     setPhase('start');
-    setCharacter(null);
-    setCurrentPlayer('player1');
-    setScore({ player1: 0, player2: 0 });
+    setSelectedTile(null);
+    setConfirmation(false);
+    setRevealed(false);
+  };
+
+  const handleCancel = () => {
+    setConfirmation(false);
+    setSelectedTile(null);
   };
 
   const renderCell = (row, col) => {
     const value = board[row][col];
-    let img = null;
-    if (value === 'player1') img = character === 'chicken' ? chickenImg : bananaImg;
-    if (value === 'player2') img = character === 'chicken' ? bananaImg : chickenImg;
+    const isChosen = value === 'chosen';
+    const tileNumber = row * 6 + col + 1;
+    const animal = randomized ? randomized[row][col] : null;
     return (
-      <div className="tile" key={`${row}-${col}`} onClick={() => handleClick(row, col)}>
-        {img && <img src={img} alt="icon" />}
+      <div
+        className={
+          'tile' +
+          (isChosen ? ' chosen-tile' : '') +
+          (value === 'opened' ? ' opened-tile' : '') +
+          (!value && phase === 'playing' ? '' : ' revealed-tile')
+        }
+        key={`${row}-${col}`}
+        onClick={() => (phase === 'playing' && !confirmation && !revealed ? handleClick(row, col) : undefined)}
+        style={{ pointerEvents: phase === 'playing' && !confirmation && !revealed && !value ? 'auto' : 'none' }}
+      >
+        <span className="tile-number center-number">{tileNumber}</span>
+        {(value === 'opened' || value === 'chosen') && (
+          <img
+            src={animal === 'chicken' ? chickenImg : bananaImg}
+            alt={animal}
+          />
+        )}
       </div>
     );
   };
@@ -68,29 +136,9 @@ function App() {
         </div>
       )}
 
-      {phase === 'select' && (
-        <div className="character-select">
-          <h2>Select Your Character</h2>
-          <div className="choice-buttons">
-            <button className="pixel-button chicken-btn" onClick={() => handleCharacterSelect('chicken')}>Chicken</button>
-            <button className="pixel-button banana-btn" onClick={() => handleCharacterSelect('banana')}>Banana</button>
-          </div>
-        </div>
-      )}
-
-      {phase === 'playing' && (
+      {(phase === 'playing' || phase === 'ended') && (
         <>
-          <h1>
-            {winner
-              ? `${winner === 'player1' ? character : character === 'chicken' ? 'Banana' : 'Chicken'} Wins!`
-              : `Turn: ${currentPlayer === 'player1' ? character : character === 'chicken' ? 'Banana' : 'Chicken'}`}
-          </h1>
-
-          <div className="score-box">
-            <div className="score player1-score animate-score">{character} Score: {score.player1}</div>
-            <div className="score player2-score animate-score">{character === 'chicken' ? 'Banana' : 'Chicken'} Score: {score.player2}</div>
-          </div>
-
+          <h1>Chicken Banana Game</h1>
           <div className="grid">
             {board.map((row, rIdx) => (
               <div key={rIdx} className="row">
@@ -99,8 +147,30 @@ function App() {
             ))}
           </div>
 
-          {winner && (
-            <button className="pixel-button restart-button" onClick={restartGame}>Restart</button>
+          <div style={{ margin: '20px 0' }}>
+            <button className="pixel-button play-button" onClick={handleReveal}>
+              {revealed ? 'Conceal All' : 'Reveal All'}
+            </button>
+            <button className="pixel-button play-button" onClick={handleRandomize}>Randomize</button>
+            <button className="pixel-button restart-button" onClick={handleExit}>Exit</button>
+          </div>
+
+          {confirmation && selectedTile && (
+            <div className="confirmation-modal">
+              <div className="confirmation-content">
+                <p>
+                  Confirm opening tile #{selectedTile.row * 6 + selectedTile.col + 1}?
+                </p>
+                <button className="pixel-button play-button" onClick={handleConfirm}>Confirm</button>
+                <button className="pixel-button restart-button" onClick={handleCancel}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {phase === 'ended' && selectedTile && (
+            <div className="message" style={{ marginTop: 20 }}>
+              Game Over! Tile #{selectedTile.row * 6 + selectedTile.col + 1} was chosen.
+            </div>
           )}
         </>
       )}
